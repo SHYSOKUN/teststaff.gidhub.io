@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACNH Real-Time Weather Cast</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&amp;family=Nunito:wght@400;600&amp;display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&amp;family=Nunito:wght@400;600&amp;display=swap');
+    
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #a3d9b3, #7c9a4e, #6ec4a8);
+      background-size: 400% 400%;
+      animation: skyShift 30s ease infinite;
+    }
+    
+    @keyframes skyShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .acnh-card {
+      background: rgba(255, 255, 255, 0.95);
+      border: 8px solid #3a2f1f;
+      box-shadow: 0 30px 60px -15px rgb(0 0 0 / 0.35);
+      border-radius: 32px;
+    }
+    
+    .weather-icon {
+      filter: drop-shadow(0 15px 20px rgba(0,0,0,0.25));
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .weather-icon:hover {
+      transform: scale(1.12) rotate(6deg);
+    }
+    
+    .rain-bg {
+      animation: rain 0.4s linear infinite;
+      background: linear-gradient(to bottom, #4a5f7a, #2c3e50);
+    }
+    
+    @keyframes rain {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 200px; }
+    }
+    
+    .star {
+      position: absolute;
+      color: #fff7cc;
+      font-size: 2.4rem;
+      animation: meteorFall linear forwards;
+      text-shadow: 0 0 25px #ffeb3b, 0 0 50px #ffeb3b;
+      z-index: 20;
+    }
+    
+    @keyframes meteorFall {
+      to {
+        transform: translateY(140vh) translateX(140px) rotate(1080deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-8">
+
+  <div class="w-full max-w-3xl mx-auto">
+
+    <!-- WEBSITE HEADER -->
+    <div class="flex items-center justify-between bg-[#3a2f1f] text-white px-8 py-5 rounded-t-3xl">
+      <div class="flex items-center gap-4">
+        <span class="text-5xl">🌿</span>
+        <div>
+          <h1 class="text-5xl font-bold tracking-widest" style="font-family: 'Comic Neue', cursive;">WEATHER CAST</h1>
+          <p class="text-xl text-amber-300 -mt-1">Animal Crossing: New Horizons • Real-Time</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-8">
+        <!-- Live indicator -->
+        <div class="flex items-center gap-2 bg-green-500 text-white px-5 py-2 rounded-full text-sm font-bold">
+          <div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+          LIVE
+        </div>
+        
+        <!-- Hemisphere -->
+        <select id="hemisphere" class="bg-white text-[#3a2f1f] font-bold text-lg px-6 py-3 rounded-2xl focus:outline-none focus:ring-4 focus:ring-amber-400">
+          <option value="north">Northern Hemisphere 🌲</option>
+          <option value="south">Southern Hemisphere 🌴</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- MAIN WEATHER SECTION -->
+    <div id="weather-card" class="acnh-card p-12 relative overflow-hidden">
+      <div id="stars-container" class="absolute inset-0 pointer-events-none"></div>
+      
+      <div class="text-center">
+        <div id="clock" class="font-mono text-7xl font-bold text-[#3a2f1f] tracking-tighter"></div>
+        <div id="date" class="text-xl text-[#5c4730] mt-2"></div>
+      </div>
+
+      <div class="flex justify-center my-10">
+        <div id="weather-icon" class="weather-icon text-[11rem] leading-none">☀️</div>
+      </div>
+      
+      <div class="text-center">
+        <div id="weather-type" class="text-6xl font-bold text-[#3a2f1f]">Sunny</div>
+        <div id="weather-desc" class="text-2xl text-[#5c4730] mt-3 max-w-md mx-auto">A perfect sunny day on the island — time to go fishing!</div>
+      </div>
+
+      <!-- Info row -->
+      <div class="mt-12 bg-[#f0e6d2] border-4 border-[#3a2f1f] rounded-3xl p-8 grid grid-cols-3 gap-8 text-center">
+        <div>
+          <div class="text-xs tracking-widest uppercase opacity-70">Wind Strength</div>
+          <div id="wind-level" class="text-6xl font-bold text-[#3a2f1f]">2</div>
+        </div>
+        <div>
+          <div class="text-xs tracking-widest uppercase opacity-70">Temperature</div>
+          <div class="text-6xl font-bold text-[#3a2f1f]">72°</div>
+        </div>
+        <div>
+          <div class="text-xs tracking-widest uppercase opacity-70">Conditions</div>
+          <div id="extra-condition" class="text-3xl">☀️ Clear Skies</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="mt-8 flex justify-center">
+      <button onclick="showYearForecast()" 
+              class="bg-[#7c9a4e] hover:bg-[#5c7a3a] text-white font-bold py-7 px-16 rounded-3xl text-2xl shadow-xl transition-all active:scale-95 flex items-center gap-4">
+        <span class="text-4xl">🌠</span>
+        FULL YEAR FORECAST
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-12 text-center text-sm text-[#3a2f1f]/70">
+      Real-Time Weather Cast • Demo simulation based on your clock • 100% offline
+    </div>
+  </div>
+
+  <!-- Year Forecast Modal -->
+  <div id="year-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
+    <div class="acnh-card w-full max-w-3xl max-h-[88vh] overflow-hidden">
+      <div class="bg-[#3a2f1f] text-white px-8 py-6 flex justify-between items-center">
+        <h2 class="text-4xl font-bold">🌟 Full Year Weather Forecast</h2>
+        <button onclick="hideYearForecast()" class="text-5xl leading-none">✕</button>
+      </div>
+      <div id="year-list" class="p-8 space-y-4 overflow-y-auto max-h-[65vh]"></div>
+    </div>
+  </div>
+
+  <script>
+    let hemisphere = 'north';
+    let meteorActive = false;
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+      document.getElementById('date').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      updateWeather(now);
+    }
+
+    function updateWeather(date) {
+      const hour = date.getHours();
+      const month = date.getMonth();
+      const isNight = hour < 6 || hour >= 20;
+      const hash = Math.abs(Math.sin(date.getFullYear() * 123 + month * 31 + date.getDate() * 7 + hour) * 10000) % 1000;
+
+      const isWinter = (hemisphere === 'north' && [11,0,1].includes(month)) || 
+                       (hemisphere === 'south' && [5,6,7].includes(month));
+
+      let type = 'Sunny', icon = '☀️', desc = 'A perfect sunny day on the island — time to go fishing!';
+      let wind = Math.floor(hash / 180) % 6;
+
+      if (isWinter && hash % 11 < 2) { type = 'Aurora'; icon = '🌌'; desc = 'Aurora borealis lighting up the night sky!'; }
+      else if (isWinter && hash > 720) { type = 'Heavy Snow'; icon = '❄️❄️'; desc = 'Time to build snowfolk and drink hot cocoa!'; }
+      else if (hash < 90) { type = 'Thunderstorm'; icon = '⛈️'; desc = 'Heavy rain and thunder rumbling across the island...'; }
+      else if (hash < 240) { type = 'Rain'; icon = '🌧️'; desc = 'Gentle rain — perfect for watering flowers!'; }
+      else if (hash < 380) { type = 'Cloudy'; icon = '☁️'; desc = 'Cozy cloudy day on the island.'; }
+      else if (isNight && (hash % 29 === 0 || hash % 43 === 0)) {
+        type = 'Meteor Shower'; icon = '🌠'; desc = 'Shooting stars falling every few minutes!';
+        meteorActive = true;
+        spawnStars();
+      }
+      else if (isNight) { type = 'Clear Night'; icon = '🌙'; desc = 'Beautiful starry night sky!'; }
+      else if (hash % 19 === 0 && hour > 9 && hour < 17) { type = 'Rainbow'; icon = '🌈'; desc = 'A gorgeous double rainbow appeared!'; }
+
+      document.getElementById('weather-icon').textContent = icon;
+      document.getElementById('weather-type').textContent = type;
+      document.getElementById('weather-desc').textContent = desc;
+      document.getElementById('wind-level').textContent = wind;
+
+      const body = document.body;
+      if (meteorActive) body.style.background = 'linear-gradient(135deg, #1e2937, #0f172a)';
+      else if (isNight) body.style.background = 'linear-gradient(135deg, #4c6b8a, #2a3f5f)';
+      else if (type.includes('Rain') || type.includes('Snow') || type.includes('Thunder')) body.classList.add('rain-bg');
+      else body.style.background = 'linear-gradient(135deg, #a3d9b3, #7c9a4e, #6ec4a8)';
+    }
+
+    function spawnStars() {
+      const container = document.getElementById('stars-container');
+      container.innerHTML = '';
+      for (let i = 0; i < 18; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.textContent = '✨';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = '-30%';
+        star.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+        container.appendChild(star);
+        setTimeout(() => star.remove(), 9000);
+      }
+      setTimeout(() => { meteorActive = false; updateWeather(new Date()); }, 18000);
+    }
+
+    function generateYearForecast() {
+      const list = document.getElementById('year-list');
+      list.innerHTML = '';
+      const now = new Date();
+      for (let i = 0; i < 365; i++) {
+        const d = new Date(now); d.setDate(d.getDate() + i);
+        const hash = Math.abs(Math.sin(d.getFullYear() * 123 + d.getMonth() * 31 + d.getDate() * 7) * 10000) % 1000;
+        let type = hash < 90 ? '⛈️ Thunderstorm' : hash < 240 ? '🌧️ Rain' : hash < 380 ? '☁️ Cloudy' : '☀️ Sunny';
+        if (hash % 29 === 0) type = '🌠 Meteor Shower';
+        if (hash % 19 === 0) type = '🌈 Rainbow';
+        
+        const item = document.createElement('div');
+        item.className = 'flex justify-between bg-[#f0e6d2] p-6 rounded-3xl border border-[#3a2f1f]/30';
+        item.innerHTML = `
+          <span class="font-medium text-lg">${d.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'})}</span>
+          <span class="font-bold text-2xl">${type}</span>
+        `;
+        list.appendChild(item);
+      }
+    }
+
+    function showYearForecast() {
+      generateYearForecast();
+      document.getElementById('year-modal').classList.remove('hidden');
+    }
+    
+    function hideYearForecast() {
+      document.getElementById('year-modal').classList.add('hidden');
+    }
+
+    document.getElementById('hemisphere').addEventListener('change', e => {
+      hemisphere = e.target.value;
+      updateWeather(new Date());
+    });
+
+    // Live clock
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>
