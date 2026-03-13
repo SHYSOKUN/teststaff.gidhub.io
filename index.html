@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACNH — Island Night & Stars • March 13 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Roboto+Slab:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e1f;
+      --card: rgba(15,20,45,0.92);
+      --pink: #ff85a1;
+      --blue: #80bfff;
+      --green: #4caf50;
+      --star: #fff8e1;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--bg);
+      color: #d0e0ff;
+      font-family: 'Roboto Slab', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    header {
+      background: rgba(10,15,35,0.9);
+      backdrop-filter: blur(12px);
+      padding: 1.4rem;
+      text-align: center;
+      border-bottom: 8px solid var(--green);
+    }
+    #now {
+      font-family: 'VT323', monospace;
+      font-size: 4.8rem;
+      color: var(--pink);
+      text-shadow: 0 0 20px rgba(255,133,161,0.6);
+      letter-spacing: 5px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 24px;
+      border: 6px solid #2e7d32;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+      overflow: hidden;
+    }
+    .card-header {
+      background: #0f1f38;
+      color: var(--blue);
+      padding: 1.2rem;
+      font-size: 1.8rem;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+    #weather-card {
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+    #weather-icon {
+      font-size: 12rem;
+      margin: 1rem 0;
+      filter: drop-shadow(0 10px 20px rgba(255,255,255,0.3));
+    }
+    #weather-name {
+      font-size: 3.8rem;
+      color: var(--pink);
+      margin: 0.5rem 0;
+    }
+    #sky-card .sky {
+      height: 520px;
+      background: radial-gradient(circle at 30% 20%, #0a1a3a 0%, #000000 70%);
+      position: relative;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      background: var(--star);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--star), 0 0 20px #a0c8ff;
+      animation: twinkle 4s infinite alternate;
+    }
+    .meteor {
+      position: absolute;
+      font-size: 10rem;
+      color: white;
+      text-shadow: 0 0 70px #ffeb3b;
+      animation: shoot 1.3s linear forwards;
+      pointer-events: none;
+      z-index: 10;
+    }
+    @keyframes twinkle { from {opacity:0.45} to {opacity:1} }
+    @keyframes shoot { 0%{transform:translate(-200px,-200px) rotate(-50deg)} 100%{transform:translate(700px,700px) rotate(-50deg)} }
+    .forecast-row {
+      display: flex;
+      overflow-x: auto;
+      gap: 1.2rem;
+      padding: 1.5rem;
+      scrollbar-color: #2e7d32 #0a0e1f;
+    }
+    .hour-card {
+      background: rgba(20,30,60,0.8);
+      min-width: 120px;
+      padding: 1.2rem 0.8rem;
+      border-radius: 16px;
+      text-align: center;
+      border: 3px solid #2e7d32;
+      flex-shrink: 0;
+    }
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1.4rem;
+      padding: 1.8rem;
+    }
+    .day-card {
+      background: rgba(20,30,60,0.8);
+      border-radius: 18px;
+      padding: 1.2rem;
+      text-align: center;
+      border: 4px solid var(--pink);
+    }
+    button {
+      font-family: 'VT323', monospace;
+      background: var(--pink);
+      color: white;
+      border: none;
+      padding: 1.2rem 3rem;
+      font-size: 1.8rem;
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 1.5rem;
+      box-shadow: 0 8px 0 #c2185b;
+      transition: all 0.2s;
+    }
+    button:active { transform: translateY(5px); box-shadow: 0 3px 0 #c2185b; }
+    footer {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6b9cff;
+      font-size: 1.3rem;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div id="now">Right Now • 02:45 AM</div>
+</header>
+
+<div class="container">
+
+  <!-- LEFT: Current Weather -->
+  <div class="card" id="weather-card">
+    <div class="card-header">Current Island Weather</div>
+    <div style="padding:3rem 2rem; text-align:center;">
+      <div id="weather-icon">🌫️</div>
+      <div id="weather-name">Fog</div>
+      <div style="font-size:1.6rem; color:#8ab4ff; margin-top:1rem;">
+        Quiet foggy night…
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Big Shooting Stars Sky -->
+  <div class="card" id="sky-card">
+    <div class="card-header">🌠 Night Sky & Shooting Stars</div>
+    <div class="sky" id="sky"></div>
+    <div style="padding:1.5rem; text-align:center;">
+      <div style="font-size:1.9rem; color:#ffeb3b; margin-bottom:1rem;">
+        Meteor nights this week:
+      </div>
+      <div style="display:flex; justify-content:center; gap:3rem; flex-wrap:wrap; font-size:1.6rem;">
+        <div>Mar 14 <span style="color:#ffeb3b">🌠</span></div>
+        <div>Mar 17 <span style="color:#ffeb3b">🌠🌠</span></div>
+        <div>Mar 19 <span style="color:#ffeb3b">🌠</span></div>
+      </div>
+      <button onclick="spawnMeteor()">✨ Watch a Shooting Star</button>
+    </div>
+  </div>
+
+  <!-- TODAY 24H -->
+  <div class="card" style="grid-column:1/-1">
+    <div class="card-header">Today — March 13 2026 (Full 24 Hours)</div>
+    <div class="forecast-row" id="today-hourly"></div>
+  </div>
+
+  <!-- TOMORROW 24H -->
+  <div class="card" style="grid-column:1/-1">
+    <div class="card-header">Tomorrow — March 14 2026 (Full 24 Hours)</div>
+    <div class="forecast-row" id="tomorrow-hourly"></div>
+  </div>
+
+  <!-- WEEK -->
+  <div class="card" style="grid-column:1/-1">
+    <div class="card-header">Full Week Overview • March 13–19</div>
+    <div class="week-grid" id="week-grid"></div>
+  </div>
+
+</div>
+
+<footer>
+  Cozy dark ACNH night theme • Live time + weather + stars • March 13 2026
+</footer>
+
+<script>
+// Time & weather
+let currentDate = new Date(2026, 2, 13, 2, 45);
+const weatherStates = ["Fog","Clear","Cloudy","Rain","Heavy Rain"];
+function updateTime() {
+  let h = currentDate.getHours();
+  let m = currentDate.getMinutes();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const hh = h % 12 || 12;
+  document.getElementById("now").textContent = `Right Now • ${hh}:${m.toString().padStart(2,'0')} ${ampm}`;
+
+  // Simple weather rotation
+  const idx = Math.floor((h + m/60) / 4) % weatherStates.length;
+  const w = weatherStates[idx];
+  const icons = {Fog:"🌫️", Clear:"🌌", Cloudy:"⛅", Rain:"🌧️", "Heavy Rain":"⛈️"};
+  document.getElementById("weather-icon").textContent = icons[w];
+  document.getElementById("weather-name").textContent = w;
+}
+
+function spawnMeteor() {
+  const sky = document.getElementById("sky");
+  const m = document.createElement("div");
+  m.className = "meteor";
+  m.textContent = "🌠";
+  m.style.left = Math.random() * 60 + "%";
+  m.style.top = Math.random() * 50 + "%";
+  sky.appendChild(m);
+  setTimeout(() => m.remove(), 1600);
+}
+
+function createSky() {
+  const sky = document.getElementById("sky");
+  sky.innerHTML = "";
+
+  // Stars
+  for (let i = 0; i < 240; i++) {
+    const s = document.createElement("div");
+    s.className = "star";
+    const sz = 1 + Math.random() * 5;
+    s.style.width = s.style.height = sz + "px";
+    s.style.left = Math.random() * 100 + "%";
+    s.style.top = Math.random() * 100 + "%";
+    s.style.animationDelay = Math.random() * 8 + "s";
+    sky.appendChild(s);
+  }
+
+  // Constellations (same as before)
+  const constels = [
+    {name:"Ursa Major",pts:[{x:25,y:18},{x:32,y:15},{x:38,y:20},{x:45,y:28},{x:52,y:35},{x:48,y:45},{x:40,y:48}],lx:38,ly:52},
+    {name:"Ursa Minor",pts:[{x:70,y:12},{x:72,y:20},{x:75,y:28},{x:78,y:35},{x:80,y:45},{x:75,y:52},{x:73,y:58}],lx:75,ly:62},
+    {name:"Leo",pts:[{x:45,y:65},{x:52,y:60},{x:58,y:62},{x:62,y:68},{x:55,y:72},{x:48,y:70}],lx:55,ly:78}
+  ];
+
+  constels.forEach(c => {
+    const pts = c.pts;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i+1];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const len = Math.sqrt(dx*dx + dy*dy) + "%";
+      const ang = Math.atan2(dy, dx) * 180 / Math.PI;
+      const l = document.createElement("div");
+      l.className = "constellation-line";
+      l.style.width = len;
+      l.style.left = a.x + "%";
+      l.style.top = a.y + "%";
+      l.style.transform = `rotate(${ang}deg)`;
+      sky.appendChild(l);
+    }
+    pts.forEach(p => {
+      const s = document.createElement("div");
+      s.className = "constellation-star";
+      s.style.left = p.x + "%";
+      s.style.top = p.y + "%";
+      sky.appendChild(s);
+    });
+    const lbl = document.createElement("div");
+    lbl.className = "constellation-label";
+    lbl.textContent = c.name;
+    lbl.style.left = c.lx + "%";
+    lbl.style.top = c.ly + "%";
+    sky.appendChild(lbl);
+  });
+}
+
+function render24(containerId, pattern) {
+  const con = document.getElementById(containerId);
+  con.innerHTML = "";
+  for (let i = 0; i < 24; i++) {
+    const w = pattern[i];
+    const icon = {Fog:"🌫️", Cloudy:"⛅", Sunny:"☀️", Rain:"🌧️", "Heavy Rain":"⛈️", Clear:"🌌"}[w] || "☀️";
+    const card = document.createElement("div");
+    card.className = "hour-card";
+    card.innerHTML = `
+      <div style="font-size:1.1rem;color:#8ab4ff">${i.toString().padStart(2,'0')}:00</div>
+      <div style="font-size:3.8rem;margin:8px 0">${icon}</div>
+      <div style="color:#a0c8ff">${w}</div>
+    `;
+    con.appendChild(card);
+  }
+}
+
+function renderWeek() {
+  const con = document.getElementById("week-grid");
+  con.innerHTML = "";
+  const d = ["13","14","15","16","17","18","19"];
+  const ic = ["🌫️","☀️","🌧️","⛅","🌠","🌧️","☀️"];
+  const n = ["Fog","Sunny","Rain","Cloudy","Clear (Stars)","Rain","Sunny"];
+  d.forEach((day,i) => {
+    const c = document.createElement("div");
+    c.className = "day-card";
+    c.innerHTML = `
+      <div style="font-size:1.2rem;color:#8ab4ff">Mar ${day}</div>
+      <div style="font-size:4.2rem;margin:0.8rem 0">${ic[i]}</div>
+      <div style="font-size:1.4rem;color:#a0c8ff">${n[i]}</div>
+      ${[1,4,6].includes(i) ? '<div style="color:#ffeb3b;margin-top:0.6rem;">🌠 Stars Tonight</div>' : ''}
+    `;
+    con.appendChild(c);
+  });
+}
+
+function init() {
+  updateTime();
+  setInterval(() => {
+    currentDate.setMinutes(currentDate.getMinutes() + 1);
+    updateTime();
+  }, 60000);
+
+  createSky();
+  render24("today-hourly", ["Fog","Fog","Fog","Cloudy","Cloudy","Sunny","Sunny","Sunny","Sunny","Cloudy","Sunny","Rain","Rain","Cloudy","Sunny","Sunny","Cloudy","Rain","Heavy Rain","Cloudy","Fog","Fog","Fog","Fog"]);
+  render24("tomorrow-hourly", ["Fog","Cloudy","Sunny","Sunny","Sunny","Sunny","Sunny","Sunny","Sunny","Sunny","Cloudy","Sunny","Sunny","Sunny","Cloudy","Rain","Cloudy","Sunny","Sunny","Clear","Clear","Clear","Fog","Fog"]);
+  renderWeek();
+
+  setInterval(() => {
+    if (Math.random() > 0.45) spawnMeteor();
+  }, 3800);
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
